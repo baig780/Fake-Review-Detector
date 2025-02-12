@@ -39,8 +39,24 @@ if not os.path.exists(nltk_data_path):
 nltk.data.path.append(nltk_data_path)
 
 # Force download of the correct resources
-nltk.download("punkt", download_dir=nltk_data_path)
-nltk.download("stopwords", download_dir=nltk_data_path)
+import nltk
+import os
+
+# Define the NLTK download directory
+NLTK_DIR = "/home/appuser/nltk_data"
+if not os.path.exists(NLTK_DIR):
+    os.makedirs(NLTK_DIR)
+
+# Set the NLTK path
+nltk.data.path.append(NLTK_DIR)
+
+# Download necessary datasets
+nltk.download("punkt", download_dir=NLTK_DIR)
+nltk.download("stopwords", download_dir=NLTK_DIR)
+
+# Ensure 'punkt' is loaded correctly
+from nltk.tokenize import word_tokenize
+)
 
 
 nltk.download("stopwords")
