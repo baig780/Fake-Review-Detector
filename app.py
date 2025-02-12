@@ -23,6 +23,7 @@ if not os.path.exists(NLTK_DIR):
 # Set the NLTK data path manually
 nltk.data.path.append(NLTK_DIR)
 
+
 # Download only the required NLTK data (no 'punkt_tab')
 nltk.download("punkt", download_dir=NLTK_DIR)
 nltk.download("stopwords", download_dir=NLTK_DIR)
@@ -202,4 +203,54 @@ if st.button("Check Review 🔍"):
         st.warning("⚠️ Please enter a review to analyze.")
 
 st.markdown("---")
-st.markdown("<h5 style='text-align: center;'>🔥 Built with ❤️ using Streamlit & AI 🔥</h5>", unsafe_allow_html=True)
+
+st.markdown("<h4 style='text-align: center;'>🚀 Made by <b>Abdul Rahman Baig</b></h4>", unsafe_allow_html=True)
+
+import json
+import os
+
+st.markdown("---")  
+st.subheader("📝 Give Your Honest Review About This App")  
+
+# User input fields
+reviewer_name = st.text_input("Your Name", "")
+app_review = st.text_area("Your Review", "")
+
+if st.button("Submit Review"):
+    if reviewer_name.strip() and app_review.strip():
+        review_entry = {"name": reviewer_name, "review": app_review}
+
+        # Load existing reviews
+        if os.path.exists("app_reviews.json"):
+            with open("app_reviews.json", "r") as f:
+                try:
+                    review_data = json.load(f)
+                except json.JSONDecodeError:
+                    review_data = []
+        else:
+            review_data = []
+
+        review_data.append(review_entry)
+
+        # Save updated reviews
+        with open("app_reviews.json", "w") as f:
+            json.dump(review_data, f, indent=4)
+
+        st.success("✅ Thank you for your feedback!")
+    else:
+        st.warning("⚠️ Please enter your name and review before submitting.")
+st.markdown("---")  
+st.subheader("📢 User Reviews About This App")
+
+try:
+    with open("app_reviews.json", "r") as f:
+        review_data = json.load(f)
+
+    if review_data:
+        for review in review_data[-10:]:  # Show the last 10 reviews
+            st.write(f"📝 **{review['name']}**: {review['review']}")
+    else:
+        st.info("No reviews yet. Be the first to leave feedback! 😊")
+except FileNotFoundError:
+    st.info("No reviews yet. Be the first to leave feedback! 😊")
+
