@@ -28,7 +28,15 @@ nltk.download("punkt", download_dir=NLTK_DIR)
 nltk.download("stopwords", download_dir=NLTK_DIR)
 
 # Ensure 'punkt' is loaded correctly
-from nltk.tokenize import word_tokenize
+import nltk
+from nltk.tokenize import RegexpTokenizer
+
+# Use a manual tokenizer instead of word_tokenize
+tokenizer = RegexpTokenizer(r'\w+')
+
+def custom_word_tokenize(text):
+    return tokenizer.tokenize(text)
+
 
 
 # Download the correct tokenizer
@@ -82,9 +90,10 @@ def clean_text(text):
     text = text.lower()
     text = re.sub(r'\d+', '', text)  # Remove numbers
     text = re.sub(r'[^\w\s]', '', text)  # Remove punctuation
-    words = word_tokenize(text)
+    words = custom_word_tokenize(text)  # USE THE NEW TOKENIZER FUNCTION
     words = [word for word in words if word not in stopwords.words("english")]
     return " ".join(words)
+
 
 # Function to analyze sentiment
 def analyze_sentiment(prob):
