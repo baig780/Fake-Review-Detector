@@ -31,7 +31,7 @@ def clean_text(text):
     text = re.sub(r'\d+', '', text)  # Remove numbers
     text = re.sub(r'[^\w\s]', '', text)  # Remove punctuation
     words = word_tokenize(text)
-    
+
     # ✅ Fix: Ensure Stopwords Work Properly
     try:
         stop_words = set(stopwords.words("english"))
@@ -166,3 +166,5 @@ try:
 except FileNotFoundError:
     st.info("No reviews yet. Be the first to leave feedback! 😊")
 
+st.markdown("---")
+st.markdown("<h4 style='text-align: center;'>🔥 Built with ❤️ using Streamlit & AI 🔥</h4>", unsafe_allow_html=True)
