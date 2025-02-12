@@ -10,7 +10,26 @@ import matplotlib.pyplot as plt
 from io import BytesIO
 
 # Download necessary NLTK data
-nltk.download("punkt")
+import nltk
+import os
+import ssl
+
+# Fix SSL issue (sometimes needed on cloud servers)
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+    ssl._create_default_https_context = _create_unverified_https_context
+except AttributeError:
+    pass
+
+# Ensure NLTK data is downloaded
+nltk_data_path = "/home/appuser/nltk_data"
+if not os.path.exists(nltk_data_path):
+    os.makedirs(nltk_data_path)
+
+nltk.data.path.append(nltk_data_path)
+nltk.download("punkt", download_dir=nltk_data_path)
+nltk.download("stopwords", download_dir=nltk_data_path)
+
 nltk.download("stopwords")
 nltk.download("omw-1.4")  # Optional: For wordnet
 nltk.download("averaged_perceptron_tagger")  # Optional: If needed for POS tagging
