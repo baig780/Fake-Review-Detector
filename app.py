@@ -12,31 +12,22 @@ from io import BytesIO
 # Download necessary NLTK data
 import nltk
 import os
-import ssl
 
-# Fix SSL issue (sometimes needed on cloud servers)
-try:
-    _create_unverified_https_context = ssl._create_unverified_context
-    ssl._create_default_https_context = _create_unverified_https_context
-except AttributeError:
-    pass
+# Define the NLTK download directory
+NLTK_DIR = "/home/appuser/nltk_data"
+if not os.path.exists(NLTK_DIR):
+    os.makedirs(NLTK_DIR)
 
-# Ensure NLTK data is downloaded
-nltk_data_path = "/home/appuser/nltk_data"
-if not os.path.exists(nltk_data_path):
-    os.makedirs(nltk_data_path)
+# Set the NLTK path manually
+nltk.data.path.append(NLTK_DIR)
 
-nltk.data.path.append(nltk_data_path)
-import nltk
-import os
+# Download the correct tokenizer
+nltk.download("punkt", download_dir=NLTK_DIR)
+nltk.download("stopwords", download_dir=NLTK_DIR)
 
-# Ensure the correct NLTK data directory exists
-nltk_data_path = os.path.join(os.getcwd(), "nltk_data")
-if not os.path.exists(nltk_data_path):
-    os.makedirs(nltk_data_path)
+# Ensure 'punkt' is loaded correctly
+from nltk.tokenize import word_tokenize
 
-# Set NLTK's data path manually
-nltk.data.path.append(nltk_data_path)
 
 # Force download of the correct resources
 import nltk
