@@ -13,13 +13,23 @@ from io import BytesIO
 import nltk
 import os
 
-# Define the NLTK download directory
+# Define the correct NLTK download directory
 NLTK_DIR = "/home/appuser/nltk_data"
+
+# Ensure the directory exists
 if not os.path.exists(NLTK_DIR):
     os.makedirs(NLTK_DIR)
 
-# Set the NLTK path manually
+# Set the NLTK data path manually
 nltk.data.path.append(NLTK_DIR)
+
+# Download only the required NLTK data (no 'punkt_tab')
+nltk.download("punkt", download_dir=NLTK_DIR)
+nltk.download("stopwords", download_dir=NLTK_DIR)
+
+# Ensure 'punkt' is loaded correctly
+from nltk.tokenize import word_tokenize
+
 
 # Download the correct tokenizer
 nltk.download("punkt", download_dir=NLTK_DIR)
