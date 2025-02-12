@@ -12,6 +12,10 @@ from io import BytesIO
 # Download necessary NLTK data
 nltk.download("punkt")
 nltk.download("stopwords")
+nltk.download("omw-1.4")  # Optional: For wordnet
+nltk.download("averaged_perceptron_tagger")  # Optional: If needed for POS tagging
+
+nltk.download("stopwords")
 
 # Load trained models and vectorizer
 model_options = {
