@@ -1,40 +1,20 @@
-
 import streamlit as st
 import joblib
 import re
 import nltk
 from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import json
 import os
 
-# ✅ Fix: Define NLTK Data Directory
-NLTK_DIR = os.path.join(os.getcwd(), "nltk_data")
-if not os.path.exists(NLTK_DIR):
-    os.makedirs(NLTK_DIR)
-nltk.data.path.append(NLTK_DIR)
+# ✅ Fix NLTK Data Issues
+nltk.download("punkt")
+nltk.download("stopwords")
 
-# ✅ Fix: Ensure NLTK Data is Available Before Running
-nltk.download("punkt", download_dir=NLTK_DIR)
-nltk.download("stopwords", download_dir=NLTK_DIR)
-
-# ✅ Fix: Custom Tokenizer to Avoid `punkt_tab` Error
-from nltk.tokenize import RegexpTokenizer
-tokenizer = RegexpTokenizer(r'\w+')
-
-def custom_word_tokenize(text):
-    return tokenizer.tokenize(text)
-
-# ✅ Fix: Ensure Stopwords Are Loaded Properly
-try:
-    stop_words = set(stopwords.words("english"))
-except LookupError:
-    nltk.download("stopwords", download_dir=NLTK_DIR)
-    stop_words = set(stopwords.words("english"))
-
-# ✅ Load trained models and vectorizer safely
+# ✅ Load trained models and vectorizer
 model_options = {
     "Logistic Regression": "fake_review_detector.pkl",
     "Random Forest": "random_forest_model.pkl",
@@ -45,15 +25,24 @@ try:
     vectorizer = joblib.load("tfidf_vectorizer.pkl")
     current_model_name = "Logistic Regression"
     model = joblib.load(model_options[current_model_name])
-except FileNotFoundError:
-    st.error("❌ Model files not found. Please upload the correct model files to your project directory.")
+except FileNotFoundError as e:
+    st.error(f"🔴 Model files not found! Upload the required `.pkl` files to your GitHub repo.\n\nError: {e}")
+    st.stop()
 
 # ✅ Function to clean text
 def clean_text(text):
     text = text.lower()
     text = re.sub(r'\d+', '', text)  # Remove numbers
     text = re.sub(r'[^\w\s]', '', text)  # Remove punctuation
-    words = custom_word_tokenize(text)  # ✅ Use Custom Tokenizer
+    words = word_tokenize(text)
+
+    # ✅ Fix Stopwords Error
+    try:
+        stop_words = set(stopwords.words("english"))
+    except LookupError:
+        nltk.download("stopwords")
+        stop_words = set(stopwords.words("english"))
+
     words = [word for word in words if word not in stop_words]
     return " ".join(words)
 
@@ -69,6 +58,19 @@ def analyze_sentiment(prob):
 # ✅ Set Streamlit page config
 st.set_page_config(page_title="Fake Review Detector", page_icon="📝", layout="centered")
 
+# ✅ Add AI Animation
+from streamlit_lottie import st_lottie
+import requests
+
+def load_lottie_url(url: str):
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    return r.json()
+
+lottie_ai = load_lottie_url("https://assets6.lottiefiles.com/packages/lf20_tll0j4bb.json")
+st_lottie(lottie_ai, height=250, key="ai-animation")
+
 # ✅ App Title
 st.markdown("<h1 class='title'>📝 Fake Review Detector AI</h1>", unsafe_allow_html=True)
 st.markdown("<h4 style='text-align: center;'>🚀 Made by <b>Abdul Rahman Baig</b></h4>", unsafe_allow_html=True)
@@ -81,11 +83,8 @@ if dark_mode:
 # ✅ Model Selection
 selected_model = st.selectbox("Select a Model:", list(model_options.keys()))
 if selected_model != current_model_name:
-    try:
-        model = joblib.load(model_options[selected_model])
-        current_model_name = selected_model
-    except FileNotFoundError:
-        st.error(f"❌ {selected_model} model file not found. Please upload the correct file.")
+    model = joblib.load(model_options[selected_model])
+    current_model_name = selected_model
 
 # ✅ User Input Section
 st.markdown("### 🔍 Enter a Review to Analyze")
@@ -120,7 +119,7 @@ if st.button("🚀 Analyze Review Now"):
             st.download_button(label="📥 Download Result", data=result_text, file_name="review_result.txt", mime="text/plain")
 
         except Exception as e:
-            st.error(f"An error occurred: {e}")
+            st.error(f"🔴 An error occurred: {e}")
     else:
         st.warning("⚠️ Please enter a review to analyze.")
 
@@ -172,4 +171,4 @@ except FileNotFoundError:
     st.info("No reviews yet. Be the first to leave feedback! 😊")
 
 st.markdown("---")
-
+st.markdown("<h4 style='text-align: center;'>🔥 Built with ❤️ using Streamlit & AI 🔥</h4>", unsafe_allow_html=True)
