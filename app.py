@@ -10,9 +10,16 @@ import matplotlib.pyplot as plt
 import json
 import os
 
-# ✅ Fix: Ensure NLTK Data Downloads Correctly
-nltk.download("punkt")
-nltk.download("stopwords")
+# ✅ Ensure NLTK Data Downloads Correctly
+try:
+    nltk.data.find("tokenizers/punkt")
+except LookupError:
+    nltk.download("punkt")
+
+try:
+    nltk.data.find("corpora/stopwords")
+except LookupError:
+    nltk.download("stopwords")
 
 # ✅ Load trained models and vectorizer
 model_options = {
@@ -24,6 +31,8 @@ model_options = {
 vectorizer = joblib.load("tfidf_vectorizer.pkl")
 current_model_name = "Logistic Regression"
 model = joblib.load(model_options[current_model_name])
+
+# Rest of your code...
 
 # ✅ Function to clean text
 def clean_text(text):
