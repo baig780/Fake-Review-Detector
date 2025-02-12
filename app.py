@@ -1,63 +1,50 @@
-
 import streamlit as st
 import joblib
 import re
 import nltk
 from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import json
 import os
+import requests
+from streamlit_lottie import st_lottie
 
-# ✅ Fix: Define NLTK Data Directory
-NLTK_DIR = os.path.join(os.getcwd(), "nltk_data")
-if not os.path.exists(NLTK_DIR):
-    os.makedirs(NLTK_DIR)
-nltk.data.path.append(NLTK_DIR)
+# ✅ Ensure NLTK Data is Downloaded Correctly
+nltk.download("punkt")
+nltk.download("stopwords")
 
-# ✅ Fix: Ensure NLTK Data is Available Before Running
-nltk.download("punkt", download_dir=NLTK_DIR)
-nltk.download("stopwords", download_dir=NLTK_DIR)
-
-# ✅ Fix: Custom Tokenizer to Avoid `punkt_tab` Error
-from nltk.tokenize import RegexpTokenizer
-tokenizer = RegexpTokenizer(r'\w+')
-
-def custom_word_tokenize(text):
-    return tokenizer.tokenize(text)
-
-# ✅ Fix: Ensure Stopwords Are Loaded Properly
-try:
-    stop_words = set(stopwords.words("english"))
-except LookupError:
-    nltk.download("stopwords", download_dir=NLTK_DIR)
-    stop_words = set(stopwords.words("english"))
-
-# ✅ Load trained models and vectorizer safely
+# ✅ Load Trained Models and Vectorizer
 model_options = {
     "Logistic Regression": "fake_review_detector.pkl",
     "Random Forest": "random_forest_model.pkl",
     "SVM": "svm_model.pkl"
 }
 
-try:
-    vectorizer = joblib.load("tfidf_vectorizer.pkl")
-    current_model_name = "Logistic Regression"
-    model = joblib.load(model_options[current_model_name])
-except FileNotFoundError:
-    st.error("❌ Model files not found. Please upload the correct model files to your project directory.")
+vectorizer = joblib.load("tfidf_vectorizer.pkl")
+current_model_name = "Logistic Regression"
+model = joblib.load(model_options[current_model_name])
 
-# ✅ Function to clean text
+# ✅ Function to Clean Text
 def clean_text(text):
     text = text.lower()
     text = re.sub(r'\d+', '', text)  # Remove numbers
     text = re.sub(r'[^\w\s]', '', text)  # Remove punctuation
-    words = custom_word_tokenize(text)  # ✅ Use Custom Tokenizer
+    words = word_tokenize(text)
+
+    # ✅ Ensure Stopwords Work Properly
+    try:
+        stop_words = set(stopwords.words("english"))
+    except LookupError:
+        nltk.download("stopwords")
+        stop_words = set(stopwords.words("english"))
+
     words = [word for word in words if word not in stop_words]
     return " ".join(words)
 
-# ✅ Function to analyze sentiment
+# ✅ Function to Analyze Sentiment
 def analyze_sentiment(prob):
     if prob > 0.7:
         return "😃 Positive"
@@ -66,8 +53,63 @@ def analyze_sentiment(prob):
     else:
         return "😠 Negative"
 
-# ✅ Set Streamlit page config
+# ✅ Streamlit Page Config
 st.set_page_config(page_title="Fake Review Detector", page_icon="📝", layout="centered")
+
+# ✅ Load AI Animation
+def load_lottie_url(url: str):
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    return r.json()
+
+lottie_ai = load_lottie_url("https://assets6.lottiefiles.com/packages/lf20_tll0j4bb.json")
+st_lottie(lottie_ai, height=250, key="ai-animation")
+
+# ✅ Custom UI Styles
+st.markdown("""
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            animation: gradientMove 10s infinite alternate;
+        }
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        .title {
+            text-align: center;
+            font-size: 38px;
+            font-weight: bold;
+            color: #00E5FF;
+            text-shadow: 0 0 15px #00E5FF;
+        }
+        .stButton button {
+            background-color: #00E5FF !important;
+            color: black !important;
+            font-size: 18px !important;
+            padding: 10px !important;
+            border-radius: 8px !important;
+            box-shadow: 0 0 10px #00E5FF;
+            transition: 0.3s ease-in-out;
+        }
+        .stButton button:hover {
+            background-color: #0096FF !important;
+            box-shadow: 0 0 20px #0096FF;
+        }
+        .result-box {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 22px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
 # ✅ App Title
 st.markdown("<h1 class='title'>📝 Fake Review Detector AI</h1>", unsafe_allow_html=True)
@@ -81,11 +123,8 @@ if dark_mode:
 # ✅ Model Selection
 selected_model = st.selectbox("Select a Model:", list(model_options.keys()))
 if selected_model != current_model_name:
-    try:
-        model = joblib.load(model_options[selected_model])
-        current_model_name = selected_model
-    except FileNotFoundError:
-        st.error(f"❌ {selected_model} model file not found. Please upload the correct file.")
+    model = joblib.load(model_options[selected_model])
+    current_model_name = selected_model
 
 # ✅ User Input Section
 st.markdown("### 🔍 Enter a Review to Analyze")
@@ -138,10 +177,7 @@ if st.button("Submit Review"):
         # ✅ Load existing reviews
         if os.path.exists("app_reviews.json"):
             with open("app_reviews.json", "r") as f:
-                try:
-                    review_data = json.load(f)
-                except json.JSONDecodeError:
-                    review_data = []
+                review_data = json.load(f)
         else:
             review_data = []
 
@@ -152,8 +188,6 @@ if st.button("Submit Review"):
             json.dump(review_data, f, indent=4)
 
         st.success("✅ Thank you for your feedback!")
-    else:
-        st.warning("⚠️ Please enter your name and review before submitting.")
 
 # ✅ Display All User Reviews
 st.markdown("---")  
@@ -162,14 +196,7 @@ st.subheader("📢 User Reviews About This App")
 try:
     with open("app_reviews.json", "r") as f:
         review_data = json.load(f)
-
-    if review_data:
-        for review in review_data[-10:]:  # Show the last 10 reviews
+        for review in review_data[-10:]:
             st.write(f"📝 **{review['name']}**: {review['review']}")
-    else:
-        st.info("No reviews yet. Be the first to leave feedback! 😊")
 except FileNotFoundError:
     st.info("No reviews yet. Be the first to leave feedback! 😊")
-
-st.markdown("---")
-st.markdown("<h4 style='text-align: center;'>🔥 Built with ❤️ using Streamlit & AI 🔥</h4>", unsafe_allow_html=True)
