@@ -166,5 +166,4 @@ try:
 except FileNotFoundError:
     st.info("No reviews yet. Be the first to leave feedback! 😊")
 
-st.markdown("---")
-st.markdown("<h4 style='text-align: center;'>🔥 Built with ❤️ using Streamlit & AI 🔥</h4>", unsafe_allow_html=True)
+
