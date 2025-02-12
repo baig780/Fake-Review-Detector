@@ -46,35 +46,89 @@ def analyze_sentiment(prob):
 # ✅ Set Streamlit page config
 st.set_page_config(page_title="Fake Review Detector", page_icon="📝", layout="centered")
 
-# ✅ Custom CSS for styling
+# ✅ Custom CSS for 3D Styling
 st.markdown("""
     <style>
-        body { font-family: 'Arial', sans-serif; background-color: #f5f5f5; }
-        .stTextArea textarea { font-size: 18px; height: 120px !important; }
-        .stButton button { background-color: #FF5733; color: white; font-size: 18px; padding: 10px; border-radius: 8px; }
-        .result-box { background-color: #ffffff; padding: 15px; border-radius: 10px; font-size: 20px; text-align: center; font-weight: bold; }
-        .review-box { background: linear-gradient(135deg, #FF416C, #FF4B2B); padding: 15px; border-radius: 12px; font-size: 18px; text-align: center; color: white; }
-        .stSelectbox select { font-size: 16px; }
-        .stTextInput input { font-size: 16px; }
+        /* 3D Background Animation */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            animation: gradientMove 10s infinite alternate;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        /* Glowing Title Effect */
+        .title {
+            text-align: center;
+            font-size: 38px;
+            font-weight: bold;
+            color: #00E5FF;
+            text-shadow: 0 0 15px #00E5FF;
+        }
+
+        /* Glowing Buttons */
+        .stButton button {
+            background-color: #00E5FF !important;
+            color: black !important;
+            font-size: 18px !important;
+            padding: 10px !important;
+            border-radius: 8px !important;
+            box-shadow: 0 0 10px #00E5FF;
+            transition: 0.3s ease-in-out;
+        }
+
+        .stButton button:hover {
+            background-color: #0096FF !important;
+            box-shadow: 0 0 20px #0096FF;
+        }
+
+        /* Glowing Result Box */
+        .result-box {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 22px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
     </style>
     """, unsafe_allow_html=True)
 
+# ✅ Add AI Animation
+from streamlit_lottie import st_lottie
+import requests
+
+def load_lottie_url(url: str):
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    return r.json()
+
+lottie_ai = load_lottie_url("https://assets6.lottiefiles.com/packages/lf20_tll0j4bb.json")
+st_lottie(lottie_ai, height=250, key="ai-animation")
+
 # ✅ App Title
-st.markdown("<h1 style='text-align: center; color: #1E90FF;'>📝 Fake Review Detector AI</h1>", unsafe_allow_html=True)
+st.markdown("<h1 class='title'>📝 Fake Review Detector AI</h1>", unsafe_allow_html=True)
 st.markdown("<h4 style='text-align: center;'>🚀 Made by <b>Abdul Rahman Baig</b></h4>", unsafe_allow_html=True)
 
-# ✅ Dark mode toggle
+# ✅ Dark Mode Toggle
 dark_mode = st.checkbox("🌙 Enable Dark Mode")
 if dark_mode:
     st.markdown("<style>body { background-color: #222; color: white; }</style>", unsafe_allow_html=True)
 
-# ✅ Model selection
+# ✅ Model Selection
 selected_model = st.selectbox("Select a Model:", list(model_options.keys()))
 if selected_model != current_model_name:
     model = joblib.load(model_options[selected_model])
     current_model_name = selected_model
 
-# ✅ User input
+# ✅ User Input Section
 st.markdown("### 🔍 Enter a Review to Analyze")
 user_review = st.text_area("✍️ Type your review here:")
 
