@@ -11,8 +11,27 @@ import json
 import os
 
 # ✅ Fix: Ensure NLTK Data Downloads Correctly
-nltk.download("punkt")
-nltk.download("stopwords")
+import nltk
+import os
+
+# ✅ Ensure NLTK directory exists
+NLTK_DIR = "/home/appuser/nltk_data"
+if not os.path.exists(NLTK_DIR):
+    os.makedirs(NLTK_DIR)
+
+# ✅ Set the correct data path for NLTK
+nltk.data.path.append(NLTK_DIR)
+
+# ✅ Fix: Download only the required data
+nltk.download("punkt", download_dir=NLTK_DIR)
+nltk.download("stopwords", download_dir=NLTK_DIR)
+
+# ✅ Ensure that 'punkt' is loaded correctly
+try:
+    from nltk.tokenize import word_tokenize
+    word_tokenize("Testing tokenization")
+except LookupError:
+    nltk.download("punkt", download_dir=NLTK_DIR)
 
 # ✅ Load trained models and vectorizer
 model_options = {
