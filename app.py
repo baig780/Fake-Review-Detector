@@ -10,31 +10,9 @@ import matplotlib.pyplot as plt
 import json
 import os
 
-# ✅ Download necessary NLTK data
-import nltk
-import os
-
-# Define the correct NLTK download directory
-NLTK_DIR = "/home/appuser/nltk_data"
-
-# Ensure the directory exists
-if not os.path.exists(NLTK_DIR):
-    os.makedirs(NLTK_DIR)
-
-# Set the NLTK data path manually
-nltk.data.path.append(NLTK_DIR)
-
-# ✅ Download necessary NLTK data
-nltk.download("punkt", download_dir=NLTK_DIR)
-nltk.download("stopwords", download_dir=NLTK_DIR)
-
-# ✅ Ensure 'punkt' is loaded correctly
-try:
-    from nltk.tokenize import word_tokenize
-    word_tokenize("Testing tokenization")
-except LookupError:
-    nltk.download("punkt", download_dir=NLTK_DIR)
-
+# ✅ Fix: Ensure NLTK Data Downloads Correctly
+nltk.download("punkt")
+nltk.download("stopwords")
 
 # ✅ Load trained models and vectorizer
 model_options = {
@@ -53,7 +31,15 @@ def clean_text(text):
     text = re.sub(r'\d+', '', text)  # Remove numbers
     text = re.sub(r'[^\w\s]', '', text)  # Remove punctuation
     words = word_tokenize(text)
-    words = [word for word in words if word not in stopwords.words("english")]
+    
+    # ✅ Fix: Ensure Stopwords Work Properly
+    try:
+        stop_words = set(stopwords.words("english"))
+    except LookupError:
+        nltk.download("stopwords")
+        stop_words = set(stopwords.words("english"))
+
+    words = [word for word in words if word not in stop_words]
     return " ".join(words)
 
 # ✅ Function to analyze sentiment
@@ -67,60 +53,6 @@ def analyze_sentiment(prob):
 
 # ✅ Set Streamlit page config
 st.set_page_config(page_title="Fake Review Detector", page_icon="📝", layout="centered")
-
-# ✅ Custom CSS for 3D Styling
-st.markdown("""
-    <style>
-        /* 3D Background Animation */
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            color: white;
-            animation: gradientMove 10s infinite alternate;
-        }
-
-        @keyframes gradientMove {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 100% 50%; }
-        }
-
-        /* Glowing Title Effect */
-        .title {
-            text-align: center;
-            font-size: 38px;
-            font-weight: bold;
-            color: #00E5FF;
-            text-shadow: 0 0 15px #00E5FF;
-        }
-
-        /* Glowing Buttons */
-        .stButton button {
-            background-color: #00E5FF !important;
-            color: black !important;
-            font-size: 18px !important;
-            padding: 10px !important;
-            border-radius: 8px !important;
-            box-shadow: 0 0 10px #00E5FF;
-            transition: 0.3s ease-in-out;
-        }
-
-        .stButton button:hover {
-            background-color: #0096FF !important;
-            box-shadow: 0 0 20px #0096FF;
-        }
-
-        /* Glowing Result Box */
-        .result-box {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 20px;
-            border-radius: 15px;
-            font-size: 22px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
-        }
-    </style>
-    """, unsafe_allow_html=True)
 
 # ✅ Add AI Animation
 from streamlit_lottie import st_lottie
