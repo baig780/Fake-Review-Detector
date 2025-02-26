@@ -10,9 +10,19 @@ import matplotlib.pyplot as plt
 import json
 import os
 
-# ✅ Ensure NLTK Data Downloads Correctly
-nltk.download("punkt")
-nltk.download("stopwords")
+import nltk
+import os
+
+# ✅ Ensure NLTK data is downloaded and set correctly
+NLTK_DIR = os.path.join(os.getcwd(), "nltk_data")
+if not os.path.exists(NLTK_DIR):
+    os.makedirs(NLTK_DIR)
+
+nltk.data.path.append(NLTK_DIR)
+
+# ✅ Force download the correct resources inside the custom directory
+nltk.download("punkt", download_dir=NLTK_DIR)
+nltk.download("stopwords", download_dir=NLTK_DIR)
 
 # ✅ Load trained models and vectorizer
 model_options = {
