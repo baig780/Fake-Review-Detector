@@ -15,18 +15,18 @@ if not os.path.exists(NLTK_DIR):
     os.makedirs(NLTK_DIR)
 nltk.data.path.append(NLTK_DIR)
 
-# ✅ Fix: Ensure NLTK Data is Available Before Running
+# ✅ Ensure NLTK Data is Available Before Running
 nltk.download("punkt", download_dir=NLTK_DIR)
 nltk.download("stopwords", download_dir=NLTK_DIR)
 
-# ✅ Custom Tokenizer
+# ✅ Custom Tokenizer to Avoid Errors
 from nltk.tokenize import RegexpTokenizer
 tokenizer = RegexpTokenizer(r'\w+')
 
 def custom_word_tokenize(text):
     return tokenizer.tokenize(text)
 
-# ✅ Load Stopwords
+# ✅ Load Stopwords Properly
 try:
     stop_words = set(stopwords.words("english"))
 except LookupError:
@@ -45,7 +45,7 @@ try:
     current_model_name = "Logistic Regression"
     model = joblib.load(model_options[current_model_name])
 except FileNotFoundError:
-    st.error("❌ Model files not found. Please upload the correct model files to your project directory.")
+    st.error("❌ Model files not found. Please upload the correct model files.")
 
 # ✅ Function to clean text
 def clean_text(text):
@@ -71,7 +71,6 @@ st.set_page_config(page_title="Fake Review Detector", page_icon="📝", layout="
 # ✅ 🔥 Advanced CSS for Stunning UI
 st.markdown("""
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #141E30, #243B55);
@@ -121,11 +120,6 @@ st.markdown("""
             color: white;
             box-shadow: 0 0 10px #00E5FF;
         }
-
-        @keyframes gradientAnimation {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 100% 50%; }
-        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -133,18 +127,15 @@ st.markdown("""
 st.markdown("<h1 class='title'>📝 Fake Review Detector AI</h1>", unsafe_allow_html=True)
 st.markdown("<h4 style='text-align: center;'>🚀 Made by <b>Abdul Rahman Baig</b></h4>", unsafe_allow_html=True)
 
-# ✅ Live Statistics
+# ✅ Live Statistics & Chart Data
 if "total_reviews" not in st.session_state:
     st.session_state.total_reviews = 0
-if "total_rating" not in st.session_state:
-    st.session_state.total_rating = 0
-if "review_count" not in st.session_state:
-    st.session_state.review_count = 0
+if "real_reviews" not in st.session_state:
+    st.session_state.real_reviews = 0
+if "fake_reviews" not in st.session_state:
+    st.session_state.fake_reviews = 0
 
 st.markdown(f"📊 **Total Reviews Analyzed:** {st.session_state.total_reviews}")
-if st.session_state.review_count > 0:
-    avg_rating = round(st.session_state.total_rating / st.session_state.review_count, 2)
-    st.markdown(f"⭐ **Average User Rating:** {avg_rating} / 5")
 
 # ✅ Review Checker Section
 st.markdown("### 🔍 Enter a Review to Analyze")
@@ -160,14 +151,19 @@ if st.button("🚀 Analyze Review Now"):
             confidence = round(max(prob) * 100, 2)
 
             st.session_state.total_reviews += 1
-
-            st.markdown("---")
-            sentiment = analyze_sentiment(prob[1])
-
             if prediction == 1:
+                st.session_state.fake_reviews += 1
                 st.markdown(f"<div class='review-box'>❌ **Fake Review Detected!** 😡 (Confidence: {confidence}%)</div>", unsafe_allow_html=True)
             else:
+                st.session_state.real_reviews += 1
                 st.markdown(f"<div class='review-box'>✅ **Real Review!** 🎉 (Confidence: {confidence}%)</div>", unsafe_allow_html=True)
+
+            # ✅ Chart Visualization
+            fig, ax = plt.subplots()
+            ax.bar(["Real Reviews", "Fake Reviews"], [st.session_state.real_reviews, st.session_state.fake_reviews], color=["green", "red"])
+            ax.set_ylabel("Number of Reviews")
+            ax.set_title("Fake vs. Real Reviews Detected")
+            st.pyplot(fig)
 
         except Exception as e:
             st.error(f"An error occurred: {e}")
@@ -180,13 +176,25 @@ st.subheader("📝 Give Your Honest Review About This App")
 
 reviewer_name = st.text_input("Your Name", "")
 app_review = st.text_area("Your Review", "")
-rating = st.slider("⭐ Rate this app (1-5):", 1, 5, 3)
 
 if st.button("Submit Review"):
     if reviewer_name.strip() and app_review.strip():
-        st.session_state.total_rating += rating
-        st.session_state.review_count += 1
+        review_entry = {"name": reviewer_name, "review": app_review}
+
+        with open("app_reviews.json", "a") as f:
+            json.dump(review_entry, f)
+            f.write("\n")
+
         st.success("✅ Thank you for your feedback!")
 
-st.markdown("---")
-st.markdown("<h4 style='text-align: center;'>🔥 Built with ❤️ using Streamlit & AI 🔥</h4>", unsafe_allow_html=True)
+# ✅ Display User Reviews
+st.markdown("---")  
+st.subheader("📢 User Reviews About This App")
+
+try:
+    with open("app_reviews.json", "r") as f:
+        for line in f:
+            review = json.loads(line)
+            st.markdown(f"<div class='review-box'>📝 **{review['name']}**: {review['review']}</div>", unsafe_allow_html=True)
+except FileNotFoundError:
+    st.info("No reviews yet. Be the first to leave feedback! 😊")
