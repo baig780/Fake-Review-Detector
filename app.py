@@ -13,16 +13,30 @@ import os
 import nltk
 import os
 
-# ✅ Ensure NLTK data is downloaded and set correctly
-NLTK_DIR = os.path.join(os.getcwd(), "nltk_data")
+import nltk
+import os
+
+# ✅ Define a permanent directory for NLTK data
+NLTK_DIR = "/home/appuser/nltk_data"
+
+# ✅ Ensure the directory exists
 if not os.path.exists(NLTK_DIR):
     os.makedirs(NLTK_DIR)
 
+# ✅ Set the NLTK data path manually
 nltk.data.path.append(NLTK_DIR)
 
-# ✅ Force download the correct resources inside the custom directory
+# ✅ Force download necessary resources and save them in the correct directory
 nltk.download("punkt", download_dir=NLTK_DIR)
 nltk.download("stopwords", download_dir=NLTK_DIR)
+
+# ✅ Manually ensure 'punkt' is loaded correctly
+try:
+    from nltk.tokenize import word_tokenize
+    word_tokenize("Test tokenization")
+except LookupError:
+    nltk.download("punkt", download_dir=NLTK_DIR)
+
 
 # ✅ Load trained models and vectorizer
 model_options = {
