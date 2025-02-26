@@ -6,9 +6,9 @@ from nltk.corpus import stopwords
 import numpy as np
 import json
 import os
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # ✅ For Chart Visualization
 
-# ✅ Define NLTK Data Directory
+# ✅ Fix: Define NLTK Data Directory
 NLTK_DIR = os.path.join(os.getcwd(), "nltk_data")
 if not os.path.exists(NLTK_DIR):
     os.makedirs(NLTK_DIR)
@@ -25,7 +25,7 @@ tokenizer = RegexpTokenizer(r'\w+')
 def custom_word_tokenize(text):
     return tokenizer.tokenize(text)
 
-# ✅ Load Stopwords
+# ✅ Ensure Stopwords Are Loaded Properly
 try:
     stop_words = set(stopwords.words("english"))
 except LookupError:
@@ -44,7 +44,7 @@ try:
     current_model_name = "Logistic Regression"
     model = joblib.load(model_options[current_model_name])
 except FileNotFoundError:
-    st.error("❌ Model files not found. Please upload the correct model files.")
+    st.error("❌ Model files not found. Please upload the correct model files to your project directory.")
 
 # ✅ Function to clean text
 def clean_text(text):
@@ -67,39 +67,40 @@ def analyze_sentiment(prob):
 # ✅ Set Streamlit page config
 st.set_page_config(page_title="Fake Review Detector", page_icon="📝", layout="wide")
 
-# ✅ **🚀 Cyberpunk UI with Futuristic Animations**
+# ✅ 🚀 **Super-Futuristic 3D UI with Holographic Effects**
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap');
         
-        /* 🌌 Cyberpunk Animated Background */
+        /* 🌟 Animated Neon Background */
         body {
             font-family: 'Orbitron', sans-serif;
-            background: radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(0,36,61,1) 50%, rgba(0,93,161,1) 100%);
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            background-size: 300% 300%;
+            animation: moveBackground 10s infinite alternate;
             color: white;
-            animation: neonGlow 2s infinite alternate;
         }
 
-        @keyframes neonGlow {
-            from { box-shadow: 0px 0px 20px cyan; }
-            to { box-shadow: 0px 0px 40px cyan; }
+        @keyframes moveBackground {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
         }
 
         /* 🚀 3D Floating Title */
         .title {
             text-align: center;
-            font-size: 60px;
+            font-size: 50px;
             font-weight: bold;
-            color: #00FFFF;
-            text-shadow: 0px 0px 15px #00FFFF, 0px 0px 30px #00FFFF;
+            color: #0ff;
+            text-shadow: 0px 0px 15px #0ff, 0px 0px 30px #0ff;
         }
 
-        /* 🔥 Cyberpunk Buttons */
+        /* 🔥 Holographic Buttons */
         .stButton button {
             background: linear-gradient(90deg, #00E5FF, #00FF87);
             color: white;
-            font-size: 22px;
-            border-radius: 15px;
+            font-size: 20px;
+            border-radius: 12px;
             padding: 15px;
             transition: 0.3s;
             box-shadow: 0px 0px 30px #00E5FF;
@@ -112,19 +113,19 @@ st.markdown("""
 
         /* 🟢 Glowing Input Fields */
         .stTextArea textarea, .stTextInput input {
-            background: rgba(0, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.1);
             color: white;
-            font-size: 22px;
+            font-size: 20px;
             border: 2px solid #00E5FF;
             box-shadow: 0px 0px 20px #00E5FF;
         }
 
         /* 🚀 Holographic Result Box */
         .result-box {
-            background: rgba(0, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.2);
             padding: 20px;
             border-radius: 15px;
-            font-size: 24px;
+            font-size: 22px;
             text-align: center;
             backdrop-filter: blur(10px);
             box-shadow: 0px 0px 30px rgba(0, 229, 255, 0.8);
@@ -132,7 +133,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ✅ **App Title**
+# ✅ **Holographic App Title**
 st.markdown("<h1 class='title'>📝 Fake Review Detector AI</h1>", unsafe_allow_html=True)
 st.markdown("<h4 style='text-align: center;'>🚀 Made by <b>Abdul Rahman Baig</b></h4>", unsafe_allow_html=True)
 
@@ -187,5 +188,10 @@ if st.button("Submit Review"):
 st.markdown("---")
 st.subheader("📢 User Reviews About This App")
 
-t
-
+try:
+    with open("app_reviews.json", "r") as f:
+        for line in f:
+            review = json.loads(line)
+            st.markdown(f"<div class='result-box'>📝 **{review['name']}**: {review['review']}</div>", unsafe_allow_html=True)
+except FileNotFoundError:
+    st.info("No reviews yet. Be the first to leave feedback! 😊")
