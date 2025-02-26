@@ -10,33 +10,9 @@ import matplotlib.pyplot as plt
 import json
 import os
 
-import nltk
-import os
-
-import nltk
-import os
-
-# ✅ Define a permanent directory for NLTK data
-NLTK_DIR = "/home/appuser/nltk_data"
-
-# ✅ Ensure the directory exists
-if not os.path.exists(NLTK_DIR):
-    os.makedirs(NLTK_DIR)
-
-# ✅ Set the NLTK data path manually
-nltk.data.path.append(NLTK_DIR)
-
-# ✅ Force download necessary resources and save them in the correct directory
-nltk.download("punkt", download_dir=NLTK_DIR)
-nltk.download("stopwords", download_dir=NLTK_DIR)
-
-# ✅ Manually ensure 'punkt' is loaded correctly
-try:
-    from nltk.tokenize import word_tokenize
-    word_tokenize("Test tokenization")
-except LookupError:
-    nltk.download("punkt", download_dir=NLTK_DIR)
-
+# ✅ Fix: Ensure NLTK Data Downloads Correctly
+nltk.download("punkt")
+nltk.download("stopwords")
 
 # ✅ Load trained models and vectorizer
 model_options = {
@@ -55,7 +31,8 @@ def clean_text(text):
     text = re.sub(r'\d+', '', text)  # Remove numbers
     text = re.sub(r'[^\w\s]', '', text)  # Remove punctuation
     words = word_tokenize(text)
-    
+
+    # ✅ Fix: Ensure Stopwords Work Properly
     try:
         stop_words = set(stopwords.words("english"))
     except LookupError:
@@ -77,38 +54,21 @@ def analyze_sentiment(prob):
 # ✅ Set Streamlit page config
 st.set_page_config(page_title="Fake Review Detector", page_icon="📝", layout="centered")
 
-# ✅ Custom CSS for a Futuristic UI
-st.markdown("""
-    <style>
-        body {
-            background: linear-gradient(120deg, #1E1E1E, #0F0F0F);
-            color: white;
-        }
-        .stTextArea textarea {
-            font-size: 18px; height: 120px !important;
-            background: #1E1E1E; color: white; border-radius: 8px;
-        }
-        .stButton button {
-            background: linear-gradient(135deg, #FF416C, #FF4B2B);
-            color: white; font-size: 18px; padding: 10px;
-            border-radius: 8px; box-shadow: 0px 0px 15px #FF4B2B;
-        }
-        .stButton button:hover {
-            background: linear-gradient(135deg, #FF4B2B, #FF416C);
-            box-shadow: 0px 0px 20px #FF416C;
-        }
-        .result-box {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 20px; border-radius: 15px;
-            font-size: 22px; text-align: center;
-            backdrop-filter: blur(10px);
-            box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.3);
-        }
-    </style>
-    """, unsafe_allow_html=True)
+# ✅ Add AI Animation
+from streamlit_lottie import st_lottie
+import requests
+
+def load_lottie_url(url: str):
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    return r.json()
+
+lottie_ai = load_lottie_url("https://assets6.lottiefiles.com/packages/lf20_tll0j4bb.json")
+st_lottie(lottie_ai, height=250, key="ai-animation")
 
 # ✅ App Title
-st.markdown("<h1 style='text-align: center; color: #00E5FF;'>📝 Fake Review Detector AI</h1>", unsafe_allow_html=True)
+st.markdown("<h1 class='title'>📝 Fake Review Detector AI</h1>", unsafe_allow_html=True)
 st.markdown("<h4 style='text-align: center;'>🚀 Made by <b>Abdul Rahman Baig</b></h4>", unsafe_allow_html=True)
 
 # ✅ Dark Mode Toggle
@@ -139,9 +99,9 @@ if st.button("🚀 Analyze Review Now"):
             sentiment = analyze_sentiment(prob[1])
 
             if prediction == 1:
-                st.markdown(f"<div class='result-box'>❌ **Fake Review Detected!** 😡 (Confidence: {confidence}%)</div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='review-box'>❌ **Fake Review Detected!** 😡 (Confidence: {confidence}%)</div>", unsafe_allow_html=True)
             else:
-                st.markdown(f"<div class='result-box'>✅ **Real Review!** 🎉 (Confidence: {confidence}%)</div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='review-box'>✅ **Real Review!** 🎉 (Confidence: {confidence}%)</div>", unsafe_allow_html=True)
 
             # ✅ Confidence Score Visualization
             fig, ax = plt.subplots()
@@ -200,11 +160,4 @@ try:
 
     if review_data:
         for review in review_data[-10:]:  # Show the last 10 reviews
-            st.write(f"📝 **{review['name']}**: {review['review']}")
-    else:
-        st.info("No reviews yet. Be the first to leave feedback! 😊")
-except FileNotFoundError:
-    st.info("No reviews yet. Be the first to leave feedback! 😊")
-
-st.markdown("---")
-st.markdown("<h4 style='text-align: center;'>🔥 Built with ❤️ using Streamlit & AI 🔥</h4>", unsafe_allow_html=True)
+            st.write(f"📝 **
