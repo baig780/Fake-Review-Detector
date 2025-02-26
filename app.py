@@ -160,4 +160,5 @@ try:
 
     if review_data:
         for review in review_data[-10:]:  # Show the last 10 reviews
-            st.write(f"📝 **
+           st.write(f"📝 **{review['name']}**: {review['review']}")
+
