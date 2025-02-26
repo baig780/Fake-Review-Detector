@@ -160,13 +160,4 @@ try:
 
     if review_data:
         for review in review_data[-10:]:  # Show the last 10 reviews
-            st.write(f"📝 **{review['name']}**: {review['review']}")
-    else:
-        st.info("No reviews yet. Be the first to leave feedback! 😊")
-except FileNotFoundError:
-    st.info("No reviews yet. Be the first to leave feedback! 😊")
-
-st.markdown("---")
-st.markdown("<h4 style='text-align: center;'>🔥 Built with ❤️ using Streamlit & AI 🔥</h4>", unsafe_allow_html=True)
-
-
+           
