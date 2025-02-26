@@ -124,6 +124,17 @@ st.markdown("""
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
         }
 
+        /* 🔥 Reviews Section */
+        .review-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 18px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 0 10px #00E5FF;
+        }
+
         /* 🔥 Gradient Animation */
         @keyframes gradientAnimation {
             0% { background-position: 0% 50%; }
@@ -136,7 +147,7 @@ st.markdown("""
 st.markdown("<h1 class='title'>📝 Fake Review Detector AI</h1>", unsafe_allow_html=True)
 st.markdown("<h4 style='text-align: center;'>🚀 Made by <b>Abdul Rahman Baig</b></h4>", unsafe_allow_html=True)
 
-# ✅ User Input Section
+# ✅ Review Checker Section
 st.markdown("### 🔍 Enter a Review to Analyze")
 user_review = st.text_area("✍️ Type your review here:")
 
@@ -153,9 +164,9 @@ if st.button("🚀 Analyze Review Now"):
             sentiment = analyze_sentiment(prob[1])
 
             if prediction == 1:
-                st.markdown(f"<div class='result-box'>❌ **Fake Review Detected!** 😡 (Confidence: {confidence}%)</div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='review-box'>❌ **Fake Review Detected!** 😡 (Confidence: {confidence}%)</div>", unsafe_allow_html=True)
             else:
-                st.markdown(f"<div class='result-box'>✅ **Real Review!** 🎉 (Confidence: {confidence}%)</div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='review-box'>✅ **Real Review!** 🎉 (Confidence: {confidence}%)</div>", unsafe_allow_html=True)
 
             # ✅ Confidence Score Visualization
             fig, ax = plt.subplots()
@@ -164,15 +175,36 @@ if st.button("🚀 Analyze Review Now"):
             ax.set_title("Prediction Confidence Levels")
             st.pyplot(fig)
 
-            # ✅ Option to download result
-            result_text = f"Review: {user_review}\nPrediction: {'Fake Review' if prediction == 1 else 'Real Review'}\nConfidence: {confidence}%\nSentiment: {sentiment}"
-            st.download_button(label="📥 Download Result", data=result_text, file_name="review_result.txt", mime="text/plain")
-
         except Exception as e:
             st.error(f"An error occurred: {e}")
     else:
         st.warning("⚠️ Please enter a review to analyze.")
 
-# ✅ Footer
-st.markdown("---")
-st.markdown("<h4 style='text-align: center;'>🔥 Built with ❤️ using Streamlit & AI 🔥</h4>", unsafe_allow_html=True)
+# ✅ User Reviews Section
+st.markdown("---")  
+st.subheader("📝 Give Your Honest Review About This App")  
+
+reviewer_name = st.text_input("Your Name", "")
+app_review = st.text_area("Your Review", "")
+
+if st.button("Submit Review"):
+    if reviewer_name.strip() and app_review.strip():
+        review_entry = {"name": reviewer_name, "review": app_review}
+
+        with open("app_reviews.json", "a") as f:
+            json.dump(review_entry, f)
+            f.write("\n")
+
+        st.success("✅ Thank you for your feedback!")
+
+# ✅ Display User Reviews
+st.markdown("---")  
+st.subheader("📢 User Reviews About This App")
+
+try:
+    with open("app_reviews.json", "r") as f:
+        for line in f:
+            review = json.loads(line)
+            st.markdown(f"<div class='review-box'>📝 **{review['name']}**: {review['review']}</div>", unsafe_allow_html=True)
+except FileNotFoundError:
+    st.info("No reviews yet. Be the first to leave feedback! 😊")
