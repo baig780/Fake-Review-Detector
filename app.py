@@ -4,6 +4,8 @@ import re
 import nltk
 from nltk.corpus import stopwords
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 import json
 import os
 
@@ -13,25 +15,25 @@ if not os.path.exists(NLTK_DIR):
     os.makedirs(NLTK_DIR)
 nltk.data.path.append(NLTK_DIR)
 
-# ✅ Ensure NLTK Data is Available Before Running
+# ✅ Fix: Ensure NLTK Data is Available Before Running
 nltk.download("punkt", download_dir=NLTK_DIR)
 nltk.download("stopwords", download_dir=NLTK_DIR)
 
-# ✅ Custom Tokenizer to Avoid `punkt_tab` Error
+# ✅ Fix: Custom Tokenizer to Avoid `punkt_tab` Error
 from nltk.tokenize import RegexpTokenizer
 tokenizer = RegexpTokenizer(r'\w+')
 
 def custom_word_tokenize(text):
     return tokenizer.tokenize(text)
 
-# ✅ Ensure Stopwords Are Loaded Properly
+# ✅ Fix: Ensure Stopwords Are Loaded Properly
 try:
     stop_words = set(stopwords.words("english"))
 except LookupError:
     nltk.download("stopwords", download_dir=NLTK_DIR)
     stop_words = set(stopwords.words("english"))
 
-# ✅ Load trained models and vectorizer
+# ✅ Load trained models and vectorizer safely
 model_options = {
     "Logistic Regression": "fake_review_detector.pkl",
     "Random Forest": "random_forest_model.pkl",
@@ -64,62 +66,54 @@ def analyze_sentiment(prob):
         return "😠 Negative"
 
 # ✅ Set Streamlit page config
-st.set_page_config(page_title="Fake Review Detector", page_icon="📝", layout="wide")
+st.set_page_config(page_title="Fake Review Detector", page_icon="📝", layout="centered")
 
-# ✅ Ultimate 3D UI Enhancements
+# ✅ 🔥 Stunning CSS for Modern UI
 st.markdown("""
     <style>
+        /* 🌟 Custom Font & Background */
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
-        
-        /* 🌟 Animated Gradient Background */
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e);
-            background-size: 400% 400%;
-            animation: gradientAnimation 8s infinite alternate;
+            background: linear-gradient(135deg, #141E30, #243B55);
             color: white;
+            animation: gradientAnimation 10s infinite alternate;
         }
 
-        @keyframes gradientAnimation {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 100% 50%; }
-        }
-
-        /* 🔥 3D Glowing Title */
+        /* 🔥 Neon Glow for Title */
         .title {
             text-align: center;
-            font-size: 45px;
+            font-size: 42px;
             font-weight: bold;
             color: #00E5FF;
-            text-shadow: 0px 0px 25px #00E5FF;
+            text-shadow: 0 0 20px #00E5FF, 0 0 40px #00E5FF;
         }
 
-        /* 💎 Stylish Buttons */
+        /* 🎨 Fancy Buttons */
         .stButton button {
-            background: linear-gradient(90deg, #00E5FF, #0096FF);
+            background: linear-gradient(135deg, #00E5FF, #0096FF);
             color: white;
             font-size: 18px;
-            border-radius: 12px;
             padding: 12px;
-            transition: 0.3s;
-            box-shadow: 0px 0px 20px #00E5FF;
+            border-radius: 10px;
+            transition: 0.3s ease-in-out;
+            box-shadow: 0 0 20px #00E5FF;
         }
         .stButton button:hover {
-            background: #0096FF;
-            box-shadow: 0px 0px 30px #0096FF;
-            transform: scale(1.1);
+            background: linear-gradient(135deg, #0096FF, #00E5FF);
+            box-shadow: 0 0 25px #0096FF;
+            transform: scale(1.05);
         }
 
-        /* 🟢 Neon Input Fields */
-        .stTextArea textarea, .stTextInput input {
-            background: #1E1E1E;
+        /* 🟢 Text Input Styling */
+        .stTextArea textarea {
+            background: rgba(255, 255, 255, 0.2);
             color: white;
-            font-size: 18px;
-            border: 2px solid #00E5FF;
-            box-shadow: 0px 0px 15px #00E5FF;
+            border-radius: 8px;
+            font-size: 16px;
         }
 
-        /* 🚀 Result Box */
+        /* 🌟 Results Box */
         .result-box {
             background: rgba(255, 255, 255, 0.2);
             padding: 20px;
@@ -127,7 +121,7 @@ st.markdown("""
             font-size: 22px;
             text-align: center;
             backdrop-filter: blur(10px);
-            box-shadow: 0px 0px 20px rgba(0, 229, 255, 0.7);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
         }
 
         /* 🔥 Reviews Section */
@@ -138,7 +132,13 @@ st.markdown("""
             font-size: 18px;
             text-align: center;
             color: white;
-            box-shadow: 0px 0px 20px #00E5FF;
+            box-shadow: 0 0 10px #00E5FF;
+        }
+
+        /* 🔥 Gradient Animation */
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
         }
     </style>
 """, unsafe_allow_html=True)
@@ -153,30 +153,36 @@ user_review = st.text_area("✍️ Type your review here:")
 
 if st.button("🚀 Analyze Review Now"):
     if user_review.strip():
-        cleaned_review = clean_text(user_review)
-        transformed_review = vectorizer.transform([cleaned_review])
-        prediction = model.predict(transformed_review)[0]
-        prob = model.predict_proba(transformed_review)[0]
-        confidence = round(max(prob) * 100, 2)
+        try:
+            cleaned_review = clean_text(user_review)
+            transformed_review = vectorizer.transform([cleaned_review])
+            prediction = model.predict(transformed_review)[0]
+            prob = model.predict_proba(transformed_review)[0]
+            confidence = round(max(prob) * 100, 2)
 
-        st.markdown("---")
-        sentiment = analyze_sentiment(prob[1])
+            st.markdown("---")
+            sentiment = analyze_sentiment(prob[1])
 
-        if prediction == 1:
-            st.markdown(f"<div class='review-box'>❌ **Fake Review Detected!** 😡 (Confidence: {confidence}%)</div>", unsafe_allow_html=True)
-        else:
-            st.markdown(f"<div class='review-box'>✅ **Real Review!** 🎉 (Confidence: {confidence}%)</div>", unsafe_allow_html=True)
+            if prediction == 1:
+                st.markdown(f"<div class='review-box'>❌ **Fake Review Detected!** 😡 (Confidence: {confidence}%)</div>", unsafe_allow_html=True)
+            else:
+                st.markdown(f"<div class='review-box'>✅ **Real Review!** 🎉 (Confidence: {confidence}%)</div>", unsafe_allow_html=True)
 
-        # ✅ Confidence Score Visualization
-        fig, ax = plt.subplots()
-        ax.bar(["Real Review", "Fake Review"], prob * 100, color=["green", "red"])
-        ax.set_ylabel("Confidence (%)")
-        ax.set_title("Prediction Confidence Levels")
-        st.pyplot(fig)
+            # ✅ Confidence Score Visualization
+            fig, ax = plt.subplots()
+            ax.bar(["Real Review", "Fake Review"], prob * 100, color=["green", "red"])
+            ax.set_ylabel("Confidence (%)")
+            ax.set_title("Prediction Confidence Levels")
+            st.pyplot(fig)
+
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
+    else:
+        st.warning("⚠️ Please enter a review to analyze.")
 
 # ✅ User Reviews Section
-st.markdown("---")
-st.subheader("📝 Give Your Honest Review About This App")
+st.markdown("---")  
+st.subheader("📝 Give Your Honest Review About This App")  
 
 reviewer_name = st.text_input("Your Name", "")
 app_review = st.text_area("Your Review", "")
@@ -192,7 +198,7 @@ if st.button("Submit Review"):
         st.success("✅ Thank you for your feedback!")
 
 # ✅ Display User Reviews
-st.markdown("---")
+st.markdown("---")  
 st.subheader("📢 User Reviews About This App")
 
 try:
@@ -202,4 +208,3 @@ try:
             st.markdown(f"<div class='review-box'>📝 **{review['name']}**: {review['review']}</div>", unsafe_allow_html=True)
 except FileNotFoundError:
     st.info("No reviews yet. Be the first to leave feedback! 😊")
-
