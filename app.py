@@ -6,6 +6,7 @@ from nltk.corpus import stopwords
 import numpy as np
 import json
 import os
+import matplotlib.pyplot as plt  # ✅ For Chart Visualization
 
 # ✅ Fix: Define NLTK Data Directory
 NLTK_DIR = os.path.join(os.getcwd(), "nltk_data")
@@ -155,6 +156,16 @@ if st.button("🚀 Analyze Review Now"):
             st.markdown(f"<div class='result-box'>❌ **Fake Review Detected!** 😡 (Confidence: {confidence}%)</div>", unsafe_allow_html=True)
         else:
             st.markdown(f"<div class='result-box'>✅ **Real Review!** 🎉 (Confidence: {confidence}%)</div>", unsafe_allow_html=True)
+
+        # ✅ **Chart Visualization for Real vs Fake**
+        labels = ["Real Review", "Fake Review"]
+        sizes = [prob[0] * 100, prob[1] * 100]
+        colors = ["#00E5FF", "#FF5733"]
+
+        fig, ax = plt.subplots()
+        ax.pie(sizes, labels=labels, autopct="%1.1f%%", colors=colors, startangle=90, shadow=True)
+        ax.set_title("Prediction Confidence Levels")
+        st.pyplot(fig)
 
 # ✅ **User Reviews Section**
 st.markdown("---")
